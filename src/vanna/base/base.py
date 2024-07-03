@@ -475,7 +475,7 @@ class VannaBase(ABC):
         self, initial_prompt: str, ddl_list: list[str], max_tokens: int = 14000
     ) -> str:
         if len(ddl_list) > 0:
-            initial_prompt += "\n===Tables \n"
+            initial_prompt += "\n===Columns \n"
 
             for ddl in ddl_list:
                 if (
@@ -575,8 +575,9 @@ class VannaBase(ABC):
             "1. If the provided context is sufficient, please generate a valid SQL query without any explanations for the question. \n"
             "2. If the provided context is almost sufficient but requires knowledge of a specific string in a particular column, please generate an intermediate SQL query to find the distinct strings in that column. Prepend the query with a comment saying intermediate_sql \n"
             "3. If the provided context is insufficient, please explain why it can't be generated. \n"
-            "4. Please use the most relevant table(s). \n"
+            "4. Please use the most relevant columns. \n"
             "5. If the question has been asked and answered before, please repeat the answer exactly as it was given before. \n"
+            "6. Please always query from the same table that is called \"df\" without the quotation marks. \n"
         )
 
         message_log = [self.system_message(initial_prompt)]
@@ -651,7 +652,7 @@ class VannaBase(ABC):
         response = self.submit_prompt(
             [
                 self.system_message(
-                    "The user will give you SQL and you will try to guess what the business question this query is answering. Return just the question without any additional explanation. Do not reference the table name in the question."
+                    "The user will give you SQL and you will try to guess what the business question this query is answering. Return just the question without any additional explanation. Do not reference the table name or the columns in the question."
                 ),
                 self.user_message(sql),
             ],
@@ -1087,7 +1088,7 @@ class VannaBase(ABC):
 
                 except Exception as e:
                     raise e
-        
+
         self.run_sql_is_set = True
         self.run_sql = run_sql_clickhouse
 
